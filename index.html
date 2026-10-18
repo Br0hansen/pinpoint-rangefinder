@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#071a17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pinpoint">
+  <meta name="description" content="Eksperimentell golf-rangefinder som måler med iPhone-kameraet">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Pinpoint — kamera-rangefinder</title>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="identity"><div class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10"/><circle cx="16" cy="16" r="3"/><path d="M16 1v7m0 16v7M1 16h7m16 0h7"/></svg></div><div><span class="eyebrow">GOLF RANGEFINDER</span><h1>PINPOINT<span class="accent">.</span></h1></div></div>
+      <div id="cameraStatus" class="camera-status"><span class="status-dot"></span><span>Ikke startet</span></div>
+    </header>
+
+    <section class="view-section" aria-label="Kamerasøker">
+      <div id="viewfinder" class="viewfinder">
+        <video id="liveVideo" autoplay muted playsinline webkit-playsinline aria-hidden="true"></video>
+        <canvas id="viewport" aria-label="Kamerabilde. Når bildet er fryst, trykk toppen og bunnen av flaggstangen."></canvas>
+        <div class="view-grid" aria-hidden="true"></div>
+        <div id="reticle" class="reticle" aria-hidden="true"><div class="crosshair-h"></div><div class="crosshair-v"></div><div class="crosshair-ring"></div></div>
+        <div class="finder-top"><span id="finderLabel" class="finder-chip">KAMERA AV</span><span id="zoomLabel" class="finder-chip quiet">1.0× visning</span></div>
+        <div id="viewPlaceholder" class="view-placeholder"><div class="placeholder-target" aria-hidden="true">◎</div><strong>Klar for en test?</strong><p>Start kameraet og sikt mot en flaggstang.</p></div>
+        <div id="viewTip" class="view-tip">Sikt mot flagget · Frys bildet · Marker stangen</div>
+      </div>
+      <div class="camera-toolbar">
+        <button id="zoomOut" class="icon-btn" type="button" disabled aria-label="Forminsk bildet">−</button>
+        <span id="zoomValue" class="zoom-value">1.0×</span>
+        <button id="zoomIn" class="icon-btn" type="button" disabled aria-label="Forstørr bildet">+</button>
+        <button id="captureButton" class="primary-action" type="button">Start kamera <span aria-hidden="true">↗</span></button>
+      </div>
+      <p class="microcopy">Forstørrelse hjelper deg å markere, men forbedrer ikke bildekvaliteten.</p>
+    </section>
+
+    <section class="settings-panel" aria-label="Måling">
+      <div class="mode-switch" role="group" aria-label="Velg modus">
+        <button id="measureTab" class="mode-tab active" type="button" aria-pressed="true">01 <strong>Mål avstand</strong></button>
+        <button id="calibrateTab" class="mode-tab" type="button" aria-pressed="false">02 <strong>Kalibrer</strong></button>
+      </div>
+      <div class="panel-body">
+        <div class="section-row"><div><span class="section-overline" id="panelOverline">AVSTANDSBEREGNING</span><h2 id="panelTitle">Mål flagget</h2></div><div class="step-bubble" id="progressBadge">0 / 2</div></div>
+        <p class="instructions" id="instructions">Start kameraet. Frys bildet og trykk på toppen og bunnen av flaggstangen.</p>
+        <div id="calibrationInput" class="calibration-input hidden"><label for="knownDistance">Kjent avstand til flaggstangen (meter)</label><div class="input-with-unit"><input id="knownDistance" type="number" inputmode="decimal" min="2" max="500" step="0.1" placeholder="f.eks. 30" autocomplete="off"><span>m</span></div><p>Bruk en avstand du har målt på forhånd. Bruk samme kamera og optisk zoom senere.</p></div>
+        <div class="step-list"><div id="topStep" class="step"><span class="step-indicator">1</span><div><strong>Marker toppen</strong><small>Trykk øverste synlige punkt på flaggstangen</small></div><span id="topDone" class="step-done"></span></div><div id="bottomStep" class="step"><span class="step-indicator">2</span><div><strong>Marker bunnen</strong><small>Der stangen møter greenen</small></div><span id="bottomDone" class="step-done"></span></div></div>
+        <div id="result" class="result hidden" aria-live="polite"><div><div class="result-caption" id="resultCaption">BEREGNET AVSTAND</div><div class="big-result"><span id="resultNumber">—</span><span class="result-unit" id="resultUnit">m</span></div></div><div class="result-indicator"><span id="qualityLabel">Eksperimentell</span></div><p id="resultDetail" class="result-detail"></p></div>
+        <div id="calibrationBanner" class="calibration-banner"><span class="calibration-light"></span><div><strong id="calibrationBannerTitle">Ikke kalibrert</strong><small id="calibrationBannerText">Kalibrer med en kjent avstand før første måling.</small></div></div>
+        <div id="actionRow" class="action-row"><button id="undoButton" class="secondary-button" type="button" disabled>Angre punkt</button><button id="saveButton" class="save-button" type="button" disabled>Beregn avstand <span aria-hidden="true">→</span></button></div>
+      </div>
+    </section>
+
+    <details class="help-box"><summary>Hvordan fungerer det, og hvor nøyaktig er det? <span>⌄</span></summary><div class="help-content"><p><strong>1.</strong> Stå på en oppmålt avstand fra en flaggstang, f.eks. 30 meter. Velg <em>Kalibrer</em>, frys et bilde, marker topp og bunn, og lagre.</p><p><strong>2.</strong> Velg <em>Mål avstand</em>, sikt mot en flaggstang med samme høyde, og marker topp og bunn.</p><p>Appen beregner avstanden ut fra forholdet mellom stangens høyde i de to bildene. Ulik flaggstanghøyde, zoom, kameravinkel, uskarphet og svært få piksler kan gi store feil. Dette er ikke en laser-rangefinder og må testes mot kjente avstander.</p><p>Bildene behandles kun på telefonen. Kalibrering lagres lokalt i nettleseren.</p><button type="button" id="resetCalibration" class="text-button">Slett lagret kalibrering</button></div></details>
+    <footer>PINPOINT LAB · PROTOTYPE v0.1.1 · IKKE VALIDERTE MÅLINGER</footer>
+  </main>
+  <script src="app.js" defer></script>
+</body>
+</html>
